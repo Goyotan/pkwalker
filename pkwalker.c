@@ -8,7 +8,7 @@
 #include <libimobiledevice/lockdown.h>
 #include <libimobiledevice/service.h>
 
-void clean(lockdownd_client_t client, idevice_t phone);
+void clean(lockdownd_client_t *client, idevice_t *phone);
 void service_error();
 void usage();
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
 	status = lockdownd_client_new_with_handshake(phone,&client,"ioshack");
 	if(LOCKDOWN_E_SUCCESS != status){
 		fprintf(stderr,"Couldn't lockdown\n");
-		clean(client,phone);
+		clean(&client,&phone);
 	}else{
 		printf("[!] CONNECTED DEVICE UDID: %s\n",device_id);
 	}
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
 	status = lockdownd_start_service(client,"com.apple.dt.simulatelocation",&service);
 	if(LOCKDOWN_E_SUCCESS != status){
 		fprintf(stderr,"Couldn't start com.apple.dt.simulatelocation\n");
-		clean(client,phone);
+		clean(&client,&phone);
 	}else{
 		printf("[!] Start com.apple.dt.simulatelocation\n");
 	}
@@ -129,12 +129,12 @@ int main(int argc, char *argv[]){
 			status = lockdownd_client_new_with_handshake(phone,&client,"ioshack");
 			if(LOCKDOWN_E_SUCCESS != status){
 				fprintf(stderr,"Couldn't lockdown\n");
-				clean(client,phone);
+				clean(&client,&phone);
 			}
 			status = lockdownd_start_service(client,"com.apple.dt.simulatelocation",&service);
 			if(LOCKDOWN_E_SUCCESS != status){
 				fprintf(stderr,"Couldn't start com.apple.dt.simulatelocation\n");
-				clean(client,phone);
+				clean(&client,&phone);
 			}
 			service_error_t service_err = service_client_new(phone,service,&service_client);
 			if(service_err){
@@ -147,11 +147,12 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-void clean(lockdownd_client_t client, idevice_t phone){
-	if(client){
-		lockdownd_client_free(client);
+void clean(lockdownd_client_t *client, idevice_t *phone){
+	if(*client){
+		lockdownd_client_free(*client);
 	}
-	idevice_free(phone);
+	idevice_free(*phone);
+	exit(0);
 }
 
 void service_error(){
